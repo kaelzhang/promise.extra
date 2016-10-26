@@ -14,7 +14,7 @@
 
 # promise.extra
 
-Promise.series and Promise.waterfall with vanilla es promise
+Promise.series and Promise.waterfall with vanilla es [`Promise`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise)/thenable
 
 ## Install
 
