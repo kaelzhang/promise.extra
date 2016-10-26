@@ -14,7 +14,7 @@
 
 # promise.extra
 
-<!-- description -->
+Promise.series and Promise.waterfall with vanilla es promise
 
 ## Install
 
@@ -25,7 +25,18 @@ $ npm install promise.extra --save
 ## Usage
 
 ```js
-const promise.extra = require('promise.extra')
+import {
+  series,
+  waterfall
+} from 'promise.extra'
+
+series([p1, p2, p3]).then(values => {
+  console.log(values)
+})
+
+waterfall([p1, p2, p3], initValue).then(result => {
+  console.log(result)
+})
 ```
 
 ## License

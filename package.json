@@ -1,7 +1,7 @@
 {
   "name": "promise.extra",
   "version": "1.0.0",
-  "description": "promise.extra",
+  "description": "Promise.series and Promise.waterfall with vanilla es promise.",
   "main": "index.js",
   "scripts": {
     "build": "babel src --out-dir lib",
@@ -13,10 +13,14 @@
     "url": "git://github.com/kaelzhang/promise.extra.git"
   },
   "keywords": [
-    "promise.extra"
+    "promise.extra",
+    "promise",
+    "promise.series",
+    "promise.waterfall",
+    "es2015"
   ],
   "engines": {
-    "node": ">=0.10.0"
+    "node": ">=4.0.0"
   },
   "author": "kaelzhang",
   "license": "MIT",
