@@ -30,14 +30,30 @@ import {
   waterfall
 } from 'promise.extra'
 
-series([p1, p2, p3]).then(values => {
+// Unlike `Promise.all`, `series` receives an array of factory functions instead of `Promise`'s.
+series([f1, f2, f3]).then(values => {
   console.log(values)
 })
 
-waterfall([p1, p2, p3], initValue).then(result => {
+waterfall([f1, f2, f3], initValue).then(result => {
   console.log(result)
 })
 ```
+
+## series(tasks)
+
+- **tasks** `Array.<PromiseFactory>` an array of functions each of which returns a `Promise`
+- **PromiseFactory** `function() : Promise` a factory function which returns a `Promise`
+
+Returns `Promise`
+
+## waterfall(tasks [, initValue])
+
+- **tasks** `Array.<PromiseFactory>`
+- **PromiseFactory** `function(x) : Promise` a factory function which receives a parameter and returns a `Promise`
+- **initValue** `any=` optional initial value which will be passed into the first factory function.
+
+Returns a `Promise`.
 
 ## License
 
