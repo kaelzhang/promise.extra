@@ -1,13 +1,13 @@
-function series (list, runner) {
+function series (list, ...args) {
   const result = list.reduce((prev, current) => {
     if (prev.p === null) {
-      prev.p = current()
+      prev.p = current(...args)
       return prev
     }
 
     prev.p = prev.p.then((r) => {
       prev.results.push(r)
-      return current()
+      return current(...args)
     })
 
     return prev
@@ -27,9 +27,9 @@ function series (list, runner) {
 }
 
 
-function waterfall (list, init) {
+function waterfall (list, init, ...args) {
   return list.reduce((prev, current) => {
-    return prev.then(current)
+    return prev.then(x => current(x, ...args))
   }, Promise.resolve(init))
 }
 

@@ -40,18 +40,20 @@ waterfall([f1, f2, f3], initValue).then(result => {
 })
 ```
 
-## series(tasks)
+## series(tasks, [...args])
 
 - **tasks** `Array.<PromiseFactory>` an array of functions each of which returns a `Promise`
 - **PromiseFactory** `function() : Promise` a factory function which returns a `Promise`
+- **args** extra arguments be passed into each `PromiseFactory`
 
 Returns `Promise`
 
-## waterfall(tasks [, initValue])
+## waterfall(tasks [, initValue] [, ...args])
 
 - **tasks** `Array.<PromiseFactory>`
 - **PromiseFactory** `function(x) : Promise` a factory function which receives a parameter and returns a `Promise`
 - **initValue** `any=` optional initial value which will be passed into the first factory function.
+- **args** extra arguments be passed into each `PromiseFactory`
 
 Returns a `Promise`.
 
