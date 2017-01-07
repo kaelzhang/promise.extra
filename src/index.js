@@ -1,13 +1,13 @@
 function series (list, ...args) {
   const result = list.reduce((prev, current) => {
     if (prev.p === null) {
-      prev.p = current.call(this, ...args)
+      prev.p = current.apply(this, args)
       return prev
     }
 
     prev.p = prev.p.then((r) => {
       prev.results.push(r)
-      return current.call(this, ...args)
+      return current.apply(this, args)
     })
 
     return prev
