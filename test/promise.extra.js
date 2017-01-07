@@ -46,6 +46,29 @@ test.cb('series: normal with args', t => {
 })
 
 
+test.cb('series: normal with args and this', t => {
+  const array = [1, 2, 3, 4, 5]
+  series.call(
+    {
+      a: 1
+    },
+    array.map((x) => {
+      return function (a, b) {
+        return Promise.resolve(this.a + x + a + b)
+      }
+    }), 1, 2
+  )
+  .then((results) => {
+    t.deepEqual(results, array.map(x => x + 3 + 1))
+    t.end()
+  })
+  .catch((err) => {
+    t.fail()
+    t.end()
+  })
+})
+
+
 test.cb('series: should reject when any error occurs', t => {
   const array = [1, 2, 3, 4, 5]
   series(
@@ -90,7 +113,7 @@ test.cb('waterfall: normal', t => {
 })
 
 
-test.cb('waterfall: normal', t => {
+test.cb('waterfall: normal with args', t => {
   const array = [1, 2, 3, 4, 5]
   waterfall(
     array.map((x, i) => {
@@ -102,6 +125,30 @@ test.cb('waterfall: normal', t => {
   )
   .then((result) => {
     t.is(result, 16 + 5 * 5)
+    t.end()
+  })
+  .catch((error) => {
+    t.is(error, 3)
+    t.end()
+  })
+})
+
+
+test.cb('waterfall: normal with args and this', t => {
+  const array = [1, 2, 3, 4, 5]
+  waterfall.call(
+    {
+      a: 1
+    },
+    array.map((x, i) => {
+      return function (n, a, b) {
+        return Promise.resolve(this.a + n + x + a + b)
+      }
+    }),
+    1, 2, 3
+  )
+  .then((result) => {
+    t.is(result, 16 + 5 * 5 + 5)
     t.end()
   })
   .catch((error) => {
