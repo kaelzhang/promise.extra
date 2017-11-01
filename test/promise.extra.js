@@ -6,6 +6,16 @@ import {
 } from '..'
 
 
+test('series: tasks which return no promises', async t => {
+  const array = [1, 2, 3, 4, 5]
+
+  return series(array.map(x => () => x))
+  .then(result => {
+    t.deepEqual(result, array)
+  })
+})
+
+
 test.cb('series: normal', t => {
   const array = [1, 2, 3, 4, 5]
   series(

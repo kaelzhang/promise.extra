@@ -1,7 +1,7 @@
 function series (list, ...args) {
   const result = list.reduce((prev, current) => {
     if (prev.p === null) {
-      prev.p = current.apply(this, args)
+      prev.p = Promise.resolve(current.apply(this, args))
       return prev
     }
 
