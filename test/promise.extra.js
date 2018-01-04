@@ -3,7 +3,7 @@ import test from 'ava'
 import {
   series,
   waterfall
-} from '..'
+} from '../src'
 
 test('series: tasks which return no promises', async t => {
   const array = [1, 2, 3, 4, 5]
@@ -102,6 +102,21 @@ test('waterfall: normal', t => {
   })
 })
 
+test('waterfall: factories return no promises', t => {
+  const array = [1, 2, 3, 4, 5]
+  return waterfall(
+    array.map((x, i) => {
+      return (n) => {
+        return n + x
+      }
+    }),
+    1
+  )
+  .then((result) => {
+    t.is(result, 16)
+  })
+})
+
 test('waterfall: normal with args', t => {
   const array = [1, 2, 3, 4, 5]
   return waterfall(
@@ -111,7 +126,7 @@ test('waterfall: normal with args', t => {
       }
     }),
     1,
-    (factory, prev) => factory(prev, 2, 3)
+    (prev, factory) => factory(prev, 2, 3)
   )
   .then((result) => {
     t.is(result, 16 + 5 * 5)
@@ -130,8 +145,8 @@ test('waterfall: normal with args and this', t => {
         return Promise.resolve(this.a + n + x + a + b)
       }
     }),
-    1, 
-    function (factory, prev) {
+    1,
+    function (prev, factory) {
       return factory.call(this, prev, 2, 3)
     }
   )

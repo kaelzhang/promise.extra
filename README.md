@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/kaelzhang/promise.extra.svg?branch=master)](https://travis-ci.org/kaelzhang/promise.extra)
+[![Coverage](https://codecov.io/gh/kaelzhang/promise.extra/branch/master/graph/badge.svg)](https://codecov.io/gh/kaelzhang/promise.extra)
 <!-- optional appveyor tst
 [![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/kaelzhang/promise.extra?branch=master&svg=true)](https://ci.appveyor.com/project/kaelzhang/promise.extra)
 -->
@@ -27,7 +28,8 @@ $ npm install promise.extra --save
 ```js
 import {
   series,
-  waterfall
+  waterfall,
+  reduce
 } from 'promise.extra'
 
 // Unlike `Promise.all`, `series` receives an array of factory functions instead of `Promise`'s.
@@ -38,12 +40,14 @@ series([f1, f2, f3]).then(values => {
 waterfall([f1, f2, f3], initValue).then(result => {
   console.log(result)
 })
+
+reduce([f1, f2, f3], reducer, initValue)
 ```
 
 ## series(tasks [, runner])
 
 - **tasks** `Array<PromiseFactory>` an array of functions each of which returns a `Promise`
-  - **PromiseFactory** `Function() : Promise` a factory function which returns a `Promise`
+  - **PromiseFactory** `Function(): Promise` a factory function which returns a `Promise`
 - **runner** `?Function(factory: PromiseFactory)` the runner which will process each `PromiseFactory`. The default value is:
 
 ```js
@@ -52,22 +56,30 @@ function defaultRunner (factory) {
 }
 ```
 
-Returns `Promise`
+Always returns `Promise`
 
 ## waterfall(tasks, initValue [, runner])
 
 - **tasks** `Array.<PromiseFactory>`
-  - **PromiseFactory** `Function(x) : Promise` a factory function which receives a parameter and returns a `Promise`
-- **initValue** `any` optional initial value which will be passed into the first factory function.
-- **runner** `?Function(factory: PromiseFactory, prev)` The default runner is:
+  - **PromiseFactory** `Function(x): Promise` a factory function which receives a parameter and returns a `Promise`
+- **initValue** `any = undefined` optional initial value which will be passed into the first factory function.
+- **runner** `?Function(prev: any, factory: PromiseFactory)` The default runner is:
 
 ```js
-function defaultRunner (factory, prev) {
+function defaultRunner (prev, factory) {
   return factory.call(this, prev)
 }
 ```
 
-Returns `Promise`.
+Always returns `Promise`.
+
+## reduce(tasks, reducer, initValue)
+
+- **tasks**
+- **reducer** `Function(prev, factory, currentIndex, tasks): Promise` The reducer function
+- **initValue** `any = undefined` if no initial value is supplied, `undefined` will be used.
+
+Always returns `Promise`
 
 ## Examples
 
