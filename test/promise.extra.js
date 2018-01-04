@@ -5,7 +5,7 @@ import {
   waterfall
 } from '../src'
 
-test('series: tasks which return no promises', async t => {
+test('series: tasks which return no promises', t => {
   const array = [1, 2, 3, 4, 5]
 
   return series(array.map(x => () => x))
