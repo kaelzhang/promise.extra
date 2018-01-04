@@ -77,7 +77,10 @@ Returns `Promise`.
 const nickName = 'Steve'
 
 // Suppose there are two async functions to check the nickName
-series([checkNickNameSyntax, removeCheckUnique], factory => factory(nickName))
+series(
+  [checkNickNameSyntax, removeCheckUnique],
+  factory => factory(nickName)
+)
 ```
 
 ### The `this` Object
@@ -96,15 +99,21 @@ function lessThan10 (notThrow) {
   return Promise.reject('larger than 10')
 }
 
-series.call({number: 10}, [lessThan10, lessThan10])  // Reject
-series.call({number: 1}, [lessThan10, lessThan10])   // Promise.resolve<true>
+series.call({number: 10}, [lessThan10, lessThan10])  
+// Reject
 
-series.call({number: 10}, [lessThan10, lessThan10], function (factory) {
-  // 1. Be careful that you should use `factory.call` here
-  //   to pass the `this` object to `factory`
-  // 2. use the parameter `notThrow`
-  return factory.call(this, true)
-})
+series.call({number: 1}, [lessThan10, lessThan10])
+// Promise.resolve<true>
+
+series.call({number: 10},
+  [lessThan10, lessThan10],
+  function (factory) {
+    // 1. Be careful that you should use `factory.call` here
+    //   to pass the `this` object to `factory`
+    // 2. use the parameter `notThrow`
+    return factory.call(this, true)
+  }
+)
 // Promise.resolve<false>
 ```
 
