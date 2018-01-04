@@ -40,22 +40,73 @@ waterfall([f1, f2, f3], initValue).then(result => {
 })
 ```
 
-## series(tasks, [...args])
+## series(tasks [, runner])
 
-- **tasks** `Array.<PromiseFactory>` an array of functions each of which returns a `Promise`
-- **PromiseFactory** `function() : Promise` a factory function which returns a `Promise`
-- **args** extra arguments be passed into each `PromiseFactory`
+- **tasks** `Array<PromiseFactory>` an array of functions each of which returns a `Promise`
+  - **PromiseFactory** `Function() : Promise` a factory function which returns a `Promise`
+- **runner** `?Function(factory: PromiseFactory)` the runner which will process each `PromiseFactory`. The default value is:
+
+```js
+function defaultRunner (factory) {
+  return factory.call(this)
+}
+```
 
 Returns `Promise`
 
-## waterfall(tasks [, initValue] [, ...args])
+## waterfall(tasks, initValue [, runner])
 
 - **tasks** `Array.<PromiseFactory>`
-- **PromiseFactory** `function(x) : Promise` a factory function which receives a parameter and returns a `Promise`
-- **initValue** `any=` optional initial value which will be passed into the first factory function.
-- **args** extra arguments be passed into each `PromiseFactory`
+  - **PromiseFactory** `Function(x) : Promise` a factory function which receives a parameter and returns a `Promise`
+- **initValue** `any` optional initial value which will be passed into the first factory function.
+- **runner** `?Function(factory: PromiseFactory, prev)` The default runner is:
 
-Returns a `Promise`.
+```js
+function defaultRunner (factory, prev) {
+  return factory.call(this, prev)
+}
+```
+
+Returns `Promise`.
+
+## Examples
+
+### Usage of `runner`
+
+```js
+const nickName = 'Steve'
+
+// Suppose there are two async functions to check the nickName
+series([checkNickNameSyntax, removeCheckUnique], factory => factory(nickName))
+```
+
+### The `this` Object
+
+```js
+function lessThan10 (notThrow) {
+  if (this.number < 10) {
+    this.number ++
+    return true
+  }
+
+  if (notThrow) {
+    return false
+  }
+
+  return Promise.reject('larger than 10')
+}
+
+series.call({number: 10}, [lessThan10, lessThan10])  // Reject
+series.call({number: 1}, [lessThan10, lessThan10])   // Promise.resolve<true>
+
+series.call({number: 10}, [lessThan10, lessThan10], function (factory) {
+  // 1. Be careful that you should use `factory.call` here
+  //   to pass the `this` object to `factory`
+  // 2. use the parameter `notThrow`
+  return factory.call(this, true)
+})
+// Promise.resolve<false>
+```
 
 ## License
 

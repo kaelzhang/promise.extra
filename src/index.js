@@ -1,38 +1,44 @@
-function series (list, ...args) {
-  const result = list.reduce((prev, current) => {
-    if (prev.p === null) {
-      prev.p = Promise.resolve(current.apply(this, args))
-      return prev
-    }
+function seriesRunner (factory) {
+  return factory.call(this)
+}
 
-    prev.p = prev.p.then((r) => {
-      prev.results.push(r)
-      return current.apply(this, args)
-    })
+function series (list, runner = seriesRunner) {
+  const length = list.length
+  const results = []
 
+  if (length === 0) {
+    return results
+  }
+
+  const run = i => i < length
+    ? Promise.resolve(runner.call(this, list[i]))
+      .then(r => {
+        results.push(r)
+        return run(i + 1)
+      })
+    : results
+
+  return run(0)
+}
+
+function waterfallRunner (factory, prev) {
+  return factory.call(this, prev)
+}
+
+function waterfall (list, init, runner = waterfallRunner) {
+  const length = list.length
+  const prev = Promise.resolve(init)
+  if (length === 0) {
     return prev
+  }
 
-  }, {
-    p: null,
-    results: []
-  })
+  const run = (i, prev) => i < length
+    ? runner.call(this, list[i], prev)
+      .then(prev => run(i + 1, prev))
+    : prev
 
-
-  return result
-  .p
-  .then((r) => {
-    result.results.push(r)
-    return result.results
-  })
+  return prev.then(prev => run(0, prev))
 }
-
-
-function waterfall (list, init, ...args) {
-  return list.reduce((prev, current) => {
-    return prev.then(x => current.call(this, x, ...args))
-  }, Promise.resolve(init))
-}
-
 
 export {
   series,
