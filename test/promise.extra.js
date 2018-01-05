@@ -14,9 +14,9 @@ test('series: tasks which return no promises', t => {
   })
 })
 
-test.cb('series: normal', t => {
+test('series: normal', t => {
   const array = [1, 2, 3, 4, 5]
-  series(
+  return series(
     array.map((x) => {
       return () => {
         return Promise.resolve(x)
@@ -25,11 +25,6 @@ test.cb('series: normal', t => {
   )
   .then((results) => {
     t.deepEqual(results, array)
-    t.end()
-  })
-  .catch((err) => {
-    t.fail()
-    t.end()
   })
 })
 
