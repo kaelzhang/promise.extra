@@ -29,7 +29,8 @@ $ npm install promise.extra --save
 import {
   series,
   waterfall,
-  reduce
+  reduce,
+  factory
 } from 'promise.extra'
 
 // Unlike `Promise.all`, `series` receives an array of factory functions instead of `Promise`'s.
@@ -80,6 +81,21 @@ Always returns `Promise`.
 - **initValue** `any = undefined` if no initial value is supplied, `undefined` will be used.
 
 Always returns `Promise`
+
+## factory(promise)
+
+- **promise** `Promise|PromiseLike`
+
+Creates the new `reduce`, `series`, `waterfall` with the `Promise` which can be `bluebird`, [`promise-faker`](https://github.com/kaelzhang/promise-faker) or something.
+
+```js
+import Promise from 'promise-faker'
+const {
+  series
+} = factory(Promise)
+
+series(tasks)
+```
 
 ## Examples
 

@@ -1,8 +1,10 @@
 import test from 'ava'
+import FakePromise from 'promise-faker'
 
 import {
   series,
-  waterfall
+  waterfall,
+  factory
 } from '../src'
 
 test('series: tasks which return no promises', t => {
@@ -148,4 +150,15 @@ test('waterfall: normal with args and this', t => {
   .then((result) => {
     t.is(result, 16 + 5 * 5 + 5)
   })
+})
+
+test('with FakePromise', async t => {
+  const {
+    series
+  } = factory(FakePromise)
+
+  const tasks = [1, 2, 3]
+
+  const a = series(tasks.map(x => () => x))
+  t.deepEqual(FakePromise.resolve(a, true), tasks)
 })
