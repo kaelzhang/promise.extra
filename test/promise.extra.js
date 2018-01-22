@@ -162,3 +162,29 @@ test('with FakePromise', async t => {
   const a = series(tasks.map(x => () => x))
   t.deepEqual(FakePromise.resolve(a, true), tasks)
 })
+
+test('series: runner with throw', async t => {
+  return series([
+    () => {
+      throw 'a'
+    }
+  ])
+  .then(() => {
+    t.fail('should fail')
+  }, err => {
+    t.is(err, 'a')
+  })
+})
+
+test('waterfall: runner with throw', async t => {
+  return waterfall([
+    () => {
+      throw 'a'
+    }
+  ])
+  .then(() => {
+    t.fail('should fail')
+  }, err => {
+    t.is(err, 'a')
+  })
+})

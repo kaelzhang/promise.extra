@@ -8,15 +8,16 @@ function waterfallRunner (prev, factory) {
 
 const factory = p => {
   function reduce (list, reducer, init) {
-    const run = (i, prev) =>
+    const run = i =>
+      prev => reducer.call(this, prev, list[i], i, list)
+
     // Do not save `list.length`,
     // because we allow user to modify the array `list`
-    i < list.length
-      ? p.resolve(reducer.call(this, prev, list[i], i, list))
-        .then(prev => run(i + 1, prev))
-      : p.resolve(prev)
+    const next = (i, prev) => i < list.length
+      ? next(i + 1, prev.then(run(i)))
+      : prev
 
-    return run(0, init)
+    return next(0, p.resolve(init))
   }
 
   function series (list, runner = seriesRunner) {
