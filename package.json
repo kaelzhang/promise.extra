@@ -1,6 +1,6 @@
 {
   "name": "promise.extra",
-  "version": "2.1.23",
+  "version": "2.1.24",
   "description": "Promise.series and Promise.waterfall with vanilla es promise/thenable.",
   "main": "lib/index.js",
   "module": "src/index.js",
@@ -11,6 +11,10 @@
     "prepublish": "npm run build",
     "report-cov": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
   },
+  "files": [
+    "src",
+    "lib"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/kaelzhang/promise.extra.git"
@@ -42,6 +46,7 @@
   "devDependencies": {
     "ava": "^0.16.0",
     "babel-cli": "^6.16.0",
+    "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-syntax-trailing-function-commas": "^6.13.0",
     "babel-plugin-transform-async-to-generator": "^6.24.1",
     "babel-plugin-transform-class-properties": "^6.16.0",
