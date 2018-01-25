@@ -6,7 +6,7 @@ function waterfallRunner (prev, factory) {
   return factory.call(this, prev)
 }
 
-const factory = p => {
+export const factory = p => {
   function reduce (list, reducer, init) {
     const run = i =>
       prev => reducer.call(this, prev, list[i], i, list)
@@ -43,5 +43,14 @@ const factory = p => {
   }
 }
 
-module.exports = factory(Promise)
-module.exports.factory = factory
+const {
+  reduce,
+  series,
+  waterfall
+} = factory(Promise)
+
+export {
+  reduce,
+  series,
+  waterfall
+}

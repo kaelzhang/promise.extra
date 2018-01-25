@@ -1,8 +1,9 @@
 {
   "name": "promise.extra",
-  "version": "2.1.2",
+  "version": "2.1.23",
   "description": "Promise.series and Promise.waterfall with vanilla es promise/thenable.",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "module": "src/index.js",
   "scripts": {
     "build": "babel src --out-dir lib",
     "test": "nyc ava --verbose --timeout=10s",
