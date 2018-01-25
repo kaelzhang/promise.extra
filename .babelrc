@@ -1,13 +1,32 @@
 {
-  "presets": [
-    "es2015"
-  ],
-  "plugins": [
-    "transform-object-rest-spread",
-    "transform-exponentiation-operator",
-    "syntax-trailing-function-commas",
-    "transform-inline-environment-variables",
-    "transform-es2015-modules-commonjs",
-    "transform-async-to-generator"
-  ]
+  "env": {
+    "es": {
+      "plugins": [
+        "transform-es2015-arrow-functions",
+        "transform-object-rest-spread",
+        "transform-exponentiation-operator",
+        "syntax-trailing-function-commas",
+        "transform-inline-environment-variables",
+        "transform-async-to-generator"
+      ]
+    },
+
+    "cjs": {
+      "plugins": [
+        "transform-es2015-modules-commonjs"
+      ]
+    },
+
+    "ava": {
+      "plugins": [
+        "transform-es2015-arrow-functions",
+        "transform-object-rest-spread",
+        "transform-exponentiation-operator",
+        "syntax-trailing-function-commas",
+        "transform-inline-environment-variables",
+        "transform-es2015-modules-commonjs",
+        "transform-async-to-generator"
+      ]
+    }
+  }
 }

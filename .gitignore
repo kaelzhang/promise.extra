@@ -1,6 +1,7 @@
 # babel dist
 /lib
 /.nyc_output
+/dist
 
 # Numerous always-ignore extensions
 *.bak
