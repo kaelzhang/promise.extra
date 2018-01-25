@@ -14,7 +14,9 @@ const factory = p => {
     // Do not save `list.length`,
     // because we allow user to modify the array `list`
     const next = (i, prev) => i < list.length
-      ? next(i + 1, prev.then(run(i)))
+      ? list.hasOwnProperty(i)
+        ? next(i + 1, prev.then(run(i)))
+        : next(i + 1, prev)
       : prev
 
     return next(0, p.resolve(init))
@@ -24,7 +26,7 @@ const factory = p => {
     return reduce.call(this, list, (prev, factory, i, list) => {
       return p.resolve(runner.call(this, factory, i, list))
       .then(result => {
-        prev.push(result)
+        prev[i] = result
         return prev
       })
     }, [])

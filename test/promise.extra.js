@@ -188,3 +188,14 @@ test('waterfall: runner with throw', async t => {
     t.is(err, 'a')
   })
 })
+
+test('series: task with empty item', async t => {
+  return series([
+    () => 1,
+    ,
+    () => 2
+  ])
+  .then(result => {
+    t.deepEqual(result, [1,,2])
+  })
+})
