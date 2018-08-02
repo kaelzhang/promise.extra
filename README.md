@@ -109,7 +109,7 @@ const nickName = 'Steve'
 // Suppose there are two async functions to check the nickName
 series(
   [checkNickNameSyntax, removeCheckUnique],
-  factory => factory(nickName)
+  (prev, factory) => factory(nickName)
 )
 ```
 
@@ -137,7 +137,7 @@ series.call({number: 1}, [lessThan10, lessThan10])
 
 series.call({number: 10},
   [lessThan10, lessThan10],
-  function (factory) {
+  function (prev, factory) {
     // 1. Be careful that you should use `factory.call` here
     //   to pass the `this` object to `factory`
     // 2. use the parameter `notThrow`
