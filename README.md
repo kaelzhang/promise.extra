@@ -82,7 +82,7 @@ Always returns `Promise`
 ## some(tasks, runner?)
 ## every(tasks, runner?)
 
-Each of the three methods is similar to the behavior of `Array.prototype.<method>`.
+Each of the methods is similar to the behavior of `Array.prototype.<method>`.
 
 ## factory(promise)
 
