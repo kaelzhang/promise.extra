@@ -33,38 +33,70 @@ import {
   factory
 } from 'promise.extra'
 
-// Unlike `Promise.all`, `series` receives an array of factory functions instead of `Promise`'s.
-series([f1, f2, f3]).then(values => {
-  console.log(values)
+series([1, 2, 3], (prev, v) => Promise.resolve(v))
+.then(values => {
+  console.log(values)  // [1, 2, 3]
 })
 
-waterfall([f1, f2, f3], initValue).then(result => {
-  console.log(result)
+waterfall([1, 2, 3], 0, (prev, v) => Promise.resolve(prev + v))
+.then(result => {
+  console.log(result)  // 6
 })
 
-reduce([f1, f2, f3], reducer, initValue)
+// The reducer could even returns non-promise values
+waterfall(
+  [1, 2, 3],
+  0,
+  (prev, v, i) => i > 0
+    ? prev + v
+    : Promise.resolve(prev + v)
+)
+.then(result => {
+  console.log(result)  // 6
+})
+
+reduce([v1, v2, v3], reducer, initValue)
 ```
 
-## series(tasks, runner?)
+## series(tasks, reducer?)
 
-- **tasks** `Array<PromiseFactory>` an array of functions each of which returns a `Promise`
-  - **PromiseFactory** `Function(): Promise` a factory function which returns a `Promise`
-- **runner** `?Function(prev: any, factory: PromiseFactory)` the runner which will process each `PromiseFactory`. The default value is:
+- **tasks** `Array<Task>` an array of tasks
+  - **Task** `any` each of the tasks could be anything.
+- **reducer** `?ReducerFunction` the reducer which will process each `task` and returns either a `Promise` or any value.
+
+```ts
+function ReducerFunction (prev: any, task: Task, index: number, tasks): Promise | any
+```
+
+- **prev** The result value of the last task which processed by the `reducer`. If the return value of the last reducer is an `Promise`, `prev` will be the value inside the promise.
+- **task** The current task.
+- **index** The index of task
+- **tasks** Just the `tasks` argument of function `series`
+
+The default value of `reducer` is:
 
 ```js
-function defaultRunner (prev, factory) {
+(prev, factory) => value
+```
+
+If you want each of the `tasks` to be a factory function that returns `promise`s or normal values, and execute each value inside the reducer, just define the reducer as:
+
+```js
+function reducer (prev, factory) {
+  // If `series` is invoked by `series.call(this, ...args)`,
+  // reducer could share the `this` object.
   return factory.call(this, prev)
 }
 ```
 
 Always returns `Promise`
 
-## waterfall(tasks, initValue, runner?)
+## waterfall(tasks, initValue, reducer?)
 
 - **tasks** `Array<PromiseFactory>`
   - **PromiseFactory** `Function(x): Promise` a factory function which receives a parameter and returns a `Promise`
-- **initValue** `any = undefined` optional initial value which will be passed into the first factory function.
-- **runner**
+- **initValue** `any | undefined` optional initial value which will be passed into the first factory function.
+- **reducer**
 
 
 Always returns `Promise`.
@@ -73,14 +105,15 @@ Always returns `Promise`.
 
 - **tasks**
 - **reducer** `Function(prev, factory, currentIndex, tasks): Promise` The reducer function
-- **initValue** `any = undefined` if no initial value is supplied, `undefined` will be used.
+- **initValue** `any | undefined` if no initial value is supplied, `undefined` will be used.
 
 Always returns `Promise`
 
-## findIndex(tasks, matcher, runner?)
-## indexOf(tasks, value, runner?)
-## some(tasks, runner?)
-## every(tasks, runner?)
+## findIndex(tasks, matcher, reducer?)
+## find(tasks, matcher, reducer?)
+## indexOf(tasks, value, reducer?)
+## some(tasks, reducer?)
+## every(tasks, reducer?)
 
 Each of the methods is similar to the behavior of `Array.prototype.<method>`.
 
@@ -101,7 +134,7 @@ series(tasks)
 
 ## Examples
 
-### Usage of `runner`
+### Usage of `reducer`
 
 ```js
 const nickName = 'Steve'

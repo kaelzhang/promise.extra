@@ -9,7 +9,11 @@ import {
 const createFactory = x => () => x
 const createPromiseFactory = p => x => () => p.resolve(x)
 
-const CASES = [
+function factoryReducer (prev, factory) {
+  return factory.call(this, prev)
+}
+
+const FACTORY_CASES = [
   {
     d: 'reduce: empty task',
     type: 'reduce',
@@ -22,9 +26,9 @@ const CASES = [
   {
     d: 'series: tasks which return no promises',
     type: 'series',
-    run (series) {
+    run (series, Promise, reducer) {
       const array = [1, 2, 3, 4, 5]
-      return series(array.map(createFactory))
+      return series(array.map(createFactory), reducer)
     },
     result: [1, 2, 3, 4, 5]
   },
@@ -32,10 +36,11 @@ const CASES = [
   {
     d: 'series: normal',
     type: 'series',
-    run (series, Promise) {
+    run (series, Promise, reducer) {
       const array = [1, 2, 3, 4, 5]
       return series(
-        array.map(createPromiseFactory(Promise))
+        array.map(createPromiseFactory(Promise)),
+        reducer
       )
     },
 
@@ -60,7 +65,7 @@ const CASES = [
   },
 
   {
-    d: 'series: normal, with runner, args and this',
+    d: 'series: normal, with reducer, args and this',
     type: 'series',
     run (series, Promise) {
       const array = [1, 2, 3, 4, 5]
@@ -85,7 +90,7 @@ const CASES = [
   {
     d: 'series: should reject when any error occurs',
     type: 'series',
-    run (series, Promise) {
+    run (series, Promise, reducer) {
       const array = [1, 2, 3, 4, 5]
       return series(
         array.map((x, i) => {
@@ -95,7 +100,8 @@ const CASES = [
             }
             return Promise.resolve(x)
           }
-        })
+        }),
+        reducer
       )
     },
     error (t, error) {
@@ -106,7 +112,7 @@ const CASES = [
   {
     d: 'waterfall: normal',
     type: 'waterfall',
-    run (waterfall, Promise) {
+    run (waterfall, Promise, reducer) {
       const array = [1, 2, 3, 4, 5]
       return waterfall(
         array.map((x, i) => {
@@ -114,7 +120,8 @@ const CASES = [
             return Promise.resolve(n + x)
           }
         }),
-        1
+        1,
+        reducer
       )
     },
     result: 16
@@ -123,7 +130,7 @@ const CASES = [
   {
     d: 'waterfall: factories return no promises',
     type: 'waterfall',
-    run (waterfall) {
+    run (waterfall, Promise, reducer) {
       const array = [1, 2, 3, 4, 5]
       return waterfall(
         array.map((x, i) => {
@@ -131,7 +138,8 @@ const CASES = [
             return n + x
           }
         }),
-        1
+        1,
+        reducer
       )
     },
     result: 16
@@ -179,14 +187,14 @@ const CASES = [
   },
 
   {
-    d: 'series: runner with throw',
+    d: 'series: reducer with throw',
     type: 'series',
-    run (series) {
+    run (series, Promise, reducer) {
       return series([
         () => {
           throw 'a'
         }
-      ])
+      ], reducer)
     },
     error (t, err) {
       t.is(err, 'a')
@@ -194,14 +202,14 @@ const CASES = [
   },
 
   {
-    d: 'waterfall: runner with throw',
+    d: 'waterfall: reducer with throw',
     type: 'waterfall',
-    run (waterfall) {
+    run (waterfall, Promise, reducer) {
       return waterfall([
         () => {
           throw 'a'
         }
-      ])
+      ], undefined, reducer)
     },
     error (t, err) {
       t.is(err, 'a')
@@ -211,12 +219,12 @@ const CASES = [
   {
     d: 'series: task with empty item',
     type: 'series',
-    run (series) {
+    run (series, Promise, reducer) {
       return series([
         () => 1,
         ,
         () => 2
-      ])
+      ], reducer)
     },
     result: [1,,2]
   },
@@ -224,8 +232,8 @@ const CASES = [
   {
     d: 'some: no promises with boolean',
     type: 'some',
-    run (some) {
-      return some([false, false, true].map(createFactory))
+    run (some, Promise, reducer) {
+      return some([false, false, true].map(createFactory), reducer)
     },
     result: true
   },
@@ -233,8 +241,8 @@ const CASES = [
   {
     d: 'some: no',
     type: 'some',
-    run (some) {
-      return some([false, false, false].map(createFactory))
+    run (some, Promise, reducer) {
+      return some([false, false, false].map(createFactory), reducer)
     },
     result: false
   },
@@ -242,8 +250,11 @@ const CASES = [
   {
     d: 'some: promises with boolean',
     type: 'some',
-    run (some, Promise) {
-      return some([false, false, true].map(createPromiseFactory(Promise)))
+    run (some, Promise, reducer) {
+      return some(
+        [false, false, true].map(createPromiseFactory(Promise)),
+        reducer
+      )
     },
     result: true
   },
@@ -251,11 +262,11 @@ const CASES = [
   {
     d: 'some: should skip factory after true',
     type: 'some',
-    run (some, Promise) {
+    run (some, Promise, reducer) {
       const tasks = [false, false, true].map(createFactory)
       return some([...tasks, () => {
         throw 'a'
-      }])
+      }], reducer)
     },
     result: true
   },
@@ -263,11 +274,11 @@ const CASES = [
   {
     d: 'some: should skip promise factory after true',
     type: 'some',
-    run (some, Promise) {
+    run (some, Promise, reducer) {
       const tasks = [false, false, true].map(createPromiseFactory(Promise))
       return some([...tasks, () => {
         return Promise.reject('a')
-      }])
+      }], reducer)
     },
     result: true
   },
@@ -275,11 +286,11 @@ const CASES = [
   {
     d: 'some: throw',
     type: 'some',
-    run (some, Promise) {
+    run (some, Promise, reducer) {
       const tasks = [false, false, true].map(createPromiseFactory(Promise))
       return some([() => {
         return Promise.reject('a')
-      }, ...tasks])
+      }, ...tasks], reducer)
     },
     error (t, err) {
       t.is(err, 'a')
@@ -289,9 +300,9 @@ const CASES = [
   {
     d: 'findIndex: normal matcher',
     type: 'findIndex',
-    run (findIndex, Promise) {
+    run (findIndex, Promise, reducer) {
       const list = [1, 2, 3].map(createPromiseFactory(Promise))
-      return findIndex(list, v => v === 2)
+      return findIndex(list, v => v === 2, reducer)
     },
     result: 1
   },
@@ -299,8 +310,8 @@ const CASES = [
   {
     d: 'findIndex: empty task',
     type: 'findIndex',
-    run (findIndex) {
-      return findIndex([], v => v === 2)
+    run (findIndex, Promise, reducer) {
+      return findIndex([], v => v === 2, reducer)
     },
     result: -1
   },
@@ -308,9 +319,9 @@ const CASES = [
   {
     d: 'indexOf: found',
     type: 'indexOf',
-    run (indexOf, Promise) {
+    run (indexOf, Promise, reducer) {
       const list = [1, 2, 3].map(createPromiseFactory(Promise))
-      return indexOf(list, 2)
+      return indexOf(list, 2, reducer)
     },
     result: 1
   },
@@ -318,9 +329,9 @@ const CASES = [
   {
     d: 'indexOf: not found',
     type: 'indexOf',
-    run (indexOf, Promise) {
+    run (indexOf, Promise, reducer) {
       const list = [1, 2, 3].map(createPromiseFactory(Promise))
-      return indexOf(list, 4)
+      return indexOf(list, 4, reducer)
     },
     result: -1
   },
@@ -328,9 +339,9 @@ const CASES = [
   {
     d: 'findIndex: promise matcher',
     type: 'findIndex',
-    run (findIndex, Promise) {
+    run (findIndex, Promise, reducer) {
       const list = [1, 2, 3].map(createPromiseFactory(Promise))
-      return findIndex(list, v => Promise.resolve(v === 2))
+      return findIndex(list, v => Promise.resolve(v === 2), reducer)
     },
     result: 1
   },
@@ -338,8 +349,8 @@ const CASES = [
   {
     d: 'every: no',
     type: 'every',
-    run (every) {
-      return every([true, true, false].map(createFactory))
+    run (every, Promise, reducer) {
+      return every([true, true, false].map(createFactory), reducer)
     },
     result: false
   },
@@ -347,11 +358,72 @@ const CASES = [
   {
     d: 'every: yes',
     type: 'every',
-    run (every) {
-      return every([true, true, true].map(createFactory))
+    run (every, Promise, reducer) {
+      return every([true, true, true].map(createFactory), reducer)
     },
     result: true
   },
+
+  {
+    d: 'find: found',
+    type: 'find',
+    run (find, Promise, reducer) {
+      return find([1, 2, 3].map(createFactory), x => x === 2, reducer)
+    },
+    result: 2
+  },
+
+  {
+    d: 'find: not found',
+    type: 'find',
+    run (find, Promise, reducer) {
+      return find([1, 2, 3].map(createFactory), x => x === 5, reducer)
+    },
+    result: undefined
+  },
+]
+
+FACTORY_CASES.forEach(c => {
+  c.reducer = factoryReducer
+})
+
+const CASES = [
+  ...FACTORY_CASES,
+  {
+    d: 'series: default reducer',
+    type: 'series',
+    run (series) {
+      return series([1, 2, 3])
+    },
+    result: [1, 2, 3]
+  },
+
+  {
+    d: 'series: default reducer',
+    type: 'series',
+    run (series) {
+      return series([1, 2, 3])
+    },
+    result: [1, 2, 3]
+  },
+
+  {
+    d: 'find: with reducer',
+    type: 'find',
+    run (find, Promise) {
+      return find([1, 2, 3], v => v === 5, (prev, v) => Promise.resolve(v + 2))
+    },
+    result: 5
+  },
+
+  {
+    d: 'find: promise matcher',
+    type: 'find',
+    run (find, Promise) {
+      return find([1, 2, 3], v => Promise.resolve(v).then(v => v === 2))
+    },
+    result: 2
+  }
 ]
 
 const getTest = only => only
@@ -367,13 +439,14 @@ const go = (p, pname, teardown) => {
     run,
     result,
     error,
+    reducer,
     only
   }) => {
 
     getTest(only)(`${pname}: ${d}`, t => {
       const method = extra[type]
       return teardown(
-        () => run(method, p),
+        () => run(method, p, reducer),
         r => {
           if (error) {
             t.fail('should fail')

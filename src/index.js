@@ -1,9 +1,6 @@
-function defaultRunner (prev, factory) {
-  return factory.call(this, prev)
-}
-
 const isPositive = x => x
 const isNegative = x => !x
+const defaultRunner = (prev, v) => v
 
 const factory = p => {
   function reduce (list, reducer, init) {
@@ -73,6 +70,22 @@ const factory = p => {
     )
   }
 
+  function find (list, matcher, runner) {
+    let found
+
+    return findIndex(list, function (result) {
+      return p.resolve(matcher.apply(this, arguments))
+      .then(matched => {
+        if (matched) {
+          found = result
+        }
+
+        return matched
+      })
+    }, runner)
+    .then(() => found)
+  }
+
   return {
     reduce,
     series,
@@ -80,7 +93,8 @@ const factory = p => {
     findIndex,
     indexOf,
     some,
-    every
+    every,
+    find
   }
 }
 
