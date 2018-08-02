@@ -36,21 +36,42 @@ export const factory = p => {
     return reduce.call(this, list, runner, init)
   }
 
+  function some (list, runner = seriesRunner) {
+    let found
+
+    return reduce.call(this, list, (prev, factory, i, list) => {
+      if (found) {
+        return found
+      }
+
+      return p.resolve(runner.call(this, factory, i, list))
+      .then(result => {
+        if (result) {
+          found = true
+          return found
+        }
+      })
+    })
+  }
+
   return {
     reduce,
     series,
-    waterfall
+    waterfall,
+    some
   }
 }
 
 const {
   reduce,
   series,
-  waterfall
+  waterfall,
+  some
 } = factory(Promise)
 
 export {
   reduce,
   series,
-  waterfall
+  waterfall,
+  some
 }

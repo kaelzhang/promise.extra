@@ -15,12 +15,12 @@
 
 # promise.extra
 
-Promise.series and Promise.waterfall with vanilla es [`Promise`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise)/thenable
+`Promise.series` and `Promise.waterfall` with vanilla es [`Promise`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise)/thenable
 
 ## Install
 
 ```sh
-$ npm install promise.extra --save
+$ npm i promise.extra
 ```
 
 ## Usage
@@ -127,7 +127,7 @@ function lessThan10 (notThrow) {
   return Promise.reject('larger than 10')
 }
 
-series.call({number: 10}, [lessThan10, lessThan10])  
+series.call({number: 10}, [lessThan10, lessThan10])
 // Reject
 
 series.call({number: 1}, [lessThan10, lessThan10])
