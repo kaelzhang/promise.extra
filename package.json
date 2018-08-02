@@ -1,20 +1,17 @@
 {
   "name": "promise.extra",
-  "version": "2.1.25",
+  "version": "2.2.0",
   "description": "Promise.series and Promise.waterfall with vanilla es promise/thenable.",
-  "main": "dist/index.js",
-  "module": "lib/index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "build:es": "BABEL_ENV=es babel src --out-dir lib",
-    "build:cjs": "BABEL_ENV=cjs babel lib --out-dir dist",
-    "build": "npm run build:es && npm run build:cjs",
+    "build:cjs": "BABEL_ENV=cjs babel src --out-dir lib",
+    "build": "npm run build:cjs",
     "test": "BABEL_ENV=ava nyc ava --verbose --timeout=10s",
     "test-no-cov": "BABEL_ENV=ava ava --verbose --timeout=10s",
     "prepublish": "npm run build",
     "report-cov": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
   },
   "files": [
-    "dist",
     "lib"
   ],
   "repository": {

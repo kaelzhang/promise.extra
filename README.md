@@ -45,32 +45,27 @@ waterfall([f1, f2, f3], initValue).then(result => {
 reduce([f1, f2, f3], reducer, initValue)
 ```
 
-## series(tasks [, runner])
+## series(tasks, runner?)
 
 - **tasks** `Array<PromiseFactory>` an array of functions each of which returns a `Promise`
   - **PromiseFactory** `Function(): Promise` a factory function which returns a `Promise`
-- **runner** `?Function(factory: PromiseFactory)` the runner which will process each `PromiseFactory`. The default value is:
-
-```js
-function defaultRunner (factory) {
-  return factory.call(this)
-}
-```
-
-Always returns `Promise`
-
-## waterfall(tasks, initValue [, runner])
-
-- **tasks** `Array.<PromiseFactory>`
-  - **PromiseFactory** `Function(x): Promise` a factory function which receives a parameter and returns a `Promise`
-- **initValue** `any = undefined` optional initial value which will be passed into the first factory function.
-- **runner** `?Function(prev: any, factory: PromiseFactory)` The default runner is:
+- **runner** `?Function(prev: any, factory: PromiseFactory)` the runner which will process each `PromiseFactory`. The default value is:
 
 ```js
 function defaultRunner (prev, factory) {
   return factory.call(this, prev)
 }
 ```
+
+Always returns `Promise`
+
+## waterfall(tasks, initValue, runner?)
+
+- **tasks** `Array<PromiseFactory>`
+  - **PromiseFactory** `Function(x): Promise` a factory function which receives a parameter and returns a `Promise`
+- **initValue** `any = undefined` optional initial value which will be passed into the first factory function.
+- **runner**
+
 
 Always returns `Promise`.
 
@@ -81,6 +76,13 @@ Always returns `Promise`.
 - **initValue** `any = undefined` if no initial value is supplied, `undefined` will be used.
 
 Always returns `Promise`
+
+## findIndex(tasks, matcher, runner?)
+## indexOf(tasks, value, runner?)
+## some(tasks, runner?)
+## every(tasks, runner?)
+
+Each of the three methods is similar to the behavior of `Array.prototype.<method>`.
 
 ## factory(promise)
 

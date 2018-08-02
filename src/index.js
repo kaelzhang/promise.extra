@@ -1,12 +1,11 @@
-function seriesRunner (factory) {
-  return factory.call(this)
-}
-
-function waterfallRunner (prev, factory) {
+function defaultRunner (prev, factory) {
   return factory.call(this, prev)
 }
 
-export const factory = p => {
+const isPositive = x => x
+const isNegative = x => !x
+
+const factory = p => {
   function reduce (list, reducer, init) {
     const run = i =>
       prev => reducer.call(this, prev, list[i], i, list)
@@ -22,9 +21,9 @@ export const factory = p => {
     return next(0, p.resolve(init))
   }
 
-  function series (list, runner = seriesRunner) {
+  function series (list, runner = defaultRunner) {
     return reduce.call(this, list, (prev, factory, i, list) => {
-      return p.resolve(runner.call(this, factory, i, list))
+      return p.resolve(runner.call(this, prev, factory, i, list))
       .then(result => {
         prev[i] = result
         return prev
@@ -32,46 +31,58 @@ export const factory = p => {
     }, [])
   }
 
-  function waterfall (list, init, runner = waterfallRunner) {
+  function waterfall (list, init, runner = defaultRunner) {
     return reduce.call(this, list, runner, init)
   }
 
-  function some (list, runner = seriesRunner) {
-    let found
-
+  function findIndex (list, matcher, runner = defaultRunner) {
     return reduce.call(this, list, (prev, factory, i, list) => {
-      if (found) {
-        return found
+      if (prev !== -1) {
+        return prev
       }
 
-      return p.resolve(runner.call(this, factory, i, list))
-      .then(result => {
-        if (result) {
-          found = true
-          return found
-        }
-      })
-    })
+      return p.resolve(runner.call(this, prev, factory, i, list))
+      .then(result => matcher.call(this, result, i, list))
+      .then(matched =>
+        matched
+          ? i
+          : -1
+      )
+    }, -1)
+  }
+
+  function indexOf (list, value, runner) {
+    return findIndex.call(this, list, result => result === value, runner)
+  }
+
+  function some (list, runner) {
+    return findIndex.call(this, list, isPositive, runner)
+    .then(index =>
+      index !== -1
+        ? true
+        : false
+    )
+  }
+
+  function every (list, runner) {
+    return findIndex.call(this, list, isNegative, runner)
+    .then(index =>
+      index === -1
+        ? true
+        : false
+    )
   }
 
   return {
     reduce,
     series,
     waterfall,
-    some
+    findIndex,
+    indexOf,
+    some,
+    every
   }
 }
 
-const {
-  reduce,
-  series,
-  waterfall,
-  some
-} = factory(Promise)
-
-export {
-  reduce,
-  series,
-  waterfall,
-  some
-}
+module.exports = factory(Promise)
+module.exports.factory = factory

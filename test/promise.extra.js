@@ -6,13 +6,25 @@ import {
   factory
 } from '../src'
 
+const createFactory = x => () => x
+const createPromiseFactory = p => x => () => p.resolve(x)
+
 const CASES = [
+  {
+    d: 'reduce: empty task',
+    type: 'reduce',
+    run (reduce) {
+      return reduce([], x => x, 1)
+    },
+    result: 1
+  },
+
   {
     d: 'series: tasks which return no promises',
     type: 'series',
     run (series) {
       const array = [1, 2, 3, 4, 5]
-      return series(array.map(x => () => x))
+      return series(array.map(createFactory))
     },
     result: [1, 2, 3, 4, 5]
   },
@@ -23,11 +35,7 @@ const CASES = [
     run (series, Promise) {
       const array = [1, 2, 3, 4, 5]
       return series(
-        array.map((x) => {
-          return () => {
-            return Promise.resolve(x)
-          }
-        })
+        array.map(createPromiseFactory(Promise))
       )
     },
 
@@ -45,14 +53,14 @@ const CASES = [
             return Promise.resolve(x + a + b)
           }
         }),
-        factory => factory(1, 2)
+        (prev, factory) => factory(1, 2)
       )
     },
     result: [1, 2, 3, 4, 5].map(x => x + 3)
   },
 
   {
-    d: 'series: normal with args and this',
+    d: 'series: normal, with runner, args and this',
     type: 'series',
     run (series, Promise) {
       const array = [1, 2, 3, 4, 5]
@@ -66,7 +74,7 @@ const CASES = [
             return Promise.resolve(this.a + x + a + b)
           }
         }),
-        function (factory) {
+        function (prev, factory) {
           return factory.call(this, 1, 2)
         }
       )
@@ -213,15 +221,142 @@ const CASES = [
     result: [1,,2]
   },
 
-  // {
-  //   d: ,
-  //   type: '',
-  //   run () {
+  {
+    d: 'some: no promises with boolean',
+    type: 'some',
+    run (some) {
+      return some([false, false, true].map(createFactory))
+    },
+    result: true
+  },
 
-  //   },
-  //   result:
-  // },
+  {
+    d: 'some: no',
+    type: 'some',
+    run (some) {
+      return some([false, false, false].map(createFactory))
+    },
+    result: false
+  },
+
+  {
+    d: 'some: promises with boolean',
+    type: 'some',
+    run (some, Promise) {
+      return some([false, false, true].map(createPromiseFactory(Promise)))
+    },
+    result: true
+  },
+
+  {
+    d: 'some: should skip factory after true',
+    type: 'some',
+    run (some, Promise) {
+      const tasks = [false, false, true].map(createFactory)
+      return some([...tasks, () => {
+        throw 'a'
+      }])
+    },
+    result: true
+  },
+
+  {
+    d: 'some: should skip promise factory after true',
+    type: 'some',
+    run (some, Promise) {
+      const tasks = [false, false, true].map(createPromiseFactory(Promise))
+      return some([...tasks, () => {
+        return Promise.reject('a')
+      }])
+    },
+    result: true
+  },
+
+  {
+    d: 'some: throw',
+    type: 'some',
+    run (some, Promise) {
+      const tasks = [false, false, true].map(createPromiseFactory(Promise))
+      return some([() => {
+        return Promise.reject('a')
+      }, ...tasks])
+    },
+    error (t, err) {
+      t.is(err, 'a')
+    }
+  },
+
+  {
+    d: 'findIndex: normal matcher',
+    type: 'findIndex',
+    run (findIndex, Promise) {
+      const list = [1, 2, 3].map(createPromiseFactory(Promise))
+      return findIndex(list, v => v === 2)
+    },
+    result: 1
+  },
+
+  {
+    d: 'findIndex: empty task',
+    type: 'findIndex',
+    run (findIndex) {
+      return findIndex([], v => v === 2)
+    },
+    result: -1
+  },
+
+  {
+    d: 'indexOf: found',
+    type: 'indexOf',
+    run (indexOf, Promise) {
+      const list = [1, 2, 3].map(createPromiseFactory(Promise))
+      return indexOf(list, 2)
+    },
+    result: 1
+  },
+
+  {
+    d: 'indexOf: not found',
+    type: 'indexOf',
+    run (indexOf, Promise) {
+      const list = [1, 2, 3].map(createPromiseFactory(Promise))
+      return indexOf(list, 4)
+    },
+    result: -1
+  },
+
+  {
+    d: 'findIndex: promise matcher',
+    type: 'findIndex',
+    run (findIndex, Promise) {
+      const list = [1, 2, 3].map(createPromiseFactory(Promise))
+      return findIndex(list, v => Promise.resolve(v === 2))
+    },
+    result: 1
+  },
+
+  {
+    d: 'every: no',
+    type: 'every',
+    run (every) {
+      return every([true, true, false].map(createFactory))
+    },
+    result: false
+  },
+
+  {
+    d: 'every: yes',
+    type: 'every',
+    run (every) {
+      return every([true, true, true].map(createFactory))
+    },
+    result: true
+  },
 ]
+
+const getTest = only => only
+  ? test.only
+  : test
 
 const go = (p, pname, teardown) => {
   const extra = factory(p)
@@ -231,13 +366,14 @@ const go = (p, pname, teardown) => {
     type,
     run,
     result,
-    error
+    error,
+    only
   }) => {
 
-    test(`${pname}: ${d}`, t => {
+    getTest(only)(`${pname}: ${d}`, t => {
       const method = extra[type]
       return teardown(
-        run(method, p),
+        () => run(method, p),
         r => {
           if (error) {
             t.fail('should fail')
@@ -254,6 +390,7 @@ const go = (p, pname, teardown) => {
 
         err => {
           if (!error) {
+            console.log(err)
             t.fail('should not fail')
             return
           }
@@ -271,7 +408,7 @@ const go = (p, pname, teardown) => {
 }
 
 const promiseDeardown = (promise, then, error) => {
-  return promise.then(then, error)
+  return promise().then(then, error)
 }
 
 go(Promise, 'vanilla promise', promiseDeardown)
@@ -281,7 +418,7 @@ go(FakePromise, 'promise-faker', (promise, then, error) => {
   let result
 
   try {
-    result = FakePromise.resolve(promise, true)
+    result = FakePromise.resolve(promise(), true)
   } catch (err) {
     error(err)
     return

@@ -1,6 +1,6 @@
 {
   "env": {
-    "es": {
+    "cjs": {
       "plugins": [
         "transform-es2015-arrow-functions",
         "transform-object-rest-spread",
@@ -8,12 +8,6 @@
         "syntax-trailing-function-commas",
         "transform-inline-environment-variables",
         "transform-async-to-generator"
-      ]
-    },
-
-    "cjs": {
-      "plugins": [
-        "transform-es2015-modules-commonjs"
       ]
     },
 
