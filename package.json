@@ -1,7 +1,7 @@
 {
   "name": "promise.extra",
-  "version": "3.0.0",
-  "description": "Promise.series and Promise.waterfall with vanilla es promise/thenable.",
+  "version": "3.0.1",
+  "description": "series, waterfall and more with vanilla es promise/thenable.",
   "main": "lib/index.js",
   "scripts": {
     "build:cjs": "babel src --out-dir lib",
@@ -26,7 +26,12 @@
     "waterfall",
     "extra",
     "async",
-    "es2015"
+    "es2015",
+    "find",
+    "findIndex",
+    "some",
+    "every",
+    "reduce"
   ],
   "ava": {
     "require": "babel-register",
