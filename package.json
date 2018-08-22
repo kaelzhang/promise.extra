@@ -1,6 +1,6 @@
 {
   "name": "promise.extra",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "series, waterfall and more with vanilla es promise/thenable.",
   "main": "lib/index.js",
   "scripts": {

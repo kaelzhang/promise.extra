@@ -76,10 +76,13 @@ function ReducerFunction (prev: any, task: Task, index: number, tasks): Promise 
 The default value of `reducer` is:
 
 ```js
-(prev, factory) => value
+
+(prev, currentValue) => currentValue
 ```
 
-If you want each of the `tasks` to be a factory function that returns `promise`s or normal values, and execute each value inside the reducer, just define the reducer as:
+`currentValue` is one of the `Task`s, and each `Task` could be a `Promise` or a normal JavaScript variable or object.
+
+If you want each of the `Task`s to be a factory function that returns a `Promise` or normal values, and execute each value inside the reducer, just define the reducer as:
 
 ```js
 function reducer (prev, factory) {
