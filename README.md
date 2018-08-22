@@ -58,11 +58,13 @@ waterfall(
 reduce([v1, v2, v3], reducer, initValue)
 ```
 
-## series(tasks, reducer?)
+## series(tasks, reducer?): Promise
 
 - **tasks** `Array<Task>` an array of tasks
   - **Task** `any` each of the tasks could be anything.
 - **reducer** `?ReducerFunction` the reducer which will process each `task` and returns either a `Promise` or any value.
+
+Always returns a `Promise`.
 
 ```ts
 function ReducerFunction (prev: any, task: Task, index: number, tasks): Promise | any
@@ -91,8 +93,6 @@ function reducer (prev, factory) {
   return factory.call(this, prev)
 }
 ```
-
-Always returns `Promise`
 
 ## waterfall(tasks, initValue, reducer?)
 
@@ -144,7 +144,7 @@ const nickName = 'Steve'
 
 // Suppose there are two async functions to check the nickName
 series(
-  [checkNickNameSyntax, removeCheckUnique],
+  [checkNickNameSyntax, remoteCheckUnique],
   (prev, factory) => factory(nickName)
 )
 ```
