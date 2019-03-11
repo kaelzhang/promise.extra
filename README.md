@@ -67,7 +67,12 @@ reduce([v1, v2, v3], reducer, initValue)
 Always returns a `Promise`.
 
 ```ts
-function ReducerFunction (prev: any, task: Task, index: number, tasks): Promise | any
+function ReducerFunction (
+  prev: any,
+  task: Task,
+  index: number,
+  tasks
+): Promise | any
 ```
 
 - **prev** The result value of the last task which processed by the `reducer`. If the return value of the last reducer is an `Promise`, `prev` will be the value inside the promise.
