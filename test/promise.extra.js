@@ -399,15 +399,6 @@ const CASES = [
   },
 
   {
-    d: 'series: default reducer',
-    type: 'series',
-    run (series) {
-      return series([1, 2, 3])
-    },
-    result: [1, 2, 3]
-  },
-
-  {
     d: 'find: with reducer',
     type: 'find',
     run (find, Promise) {
