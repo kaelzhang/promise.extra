@@ -188,6 +188,12 @@ series.call({number: 10},
 // Promise.resolve<false>
 ```
 
+## Upgrade Guide
+
+### 3.x -> 4.x
+
+`promise.extra` no longer supports node < 6 since `4.0.0`. For old node versions, `require('promise.extra/legacy')`
+
 ## License
 
 MIT

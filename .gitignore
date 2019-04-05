@@ -2,6 +2,7 @@
 /lib
 /.nyc_output
 /dist
+legacy.js
 
 # Numerous always-ignore extensions
 *.bak

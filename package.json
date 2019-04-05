@@ -1,10 +1,10 @@
 {
   "name": "promise.extra",
-  "version": "3.0.5",
+  "version": "4.0.0",
   "description": "series, waterfall and more with vanilla es promise/thenable.",
-  "main": "lib/index.js",
+  "main": "index.js",
   "scripts": {
-    "build:cjs": "babel src --out-dir lib",
+    "build:cjs": "babel index.js -o legacy.js",
     "build": "npm run build:cjs",
     "test": "nyc ava --verbose --timeout=10s",
     "test-no-cov": "ava --verbose --timeout=10s",
@@ -12,7 +12,8 @@
     "report-cov": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
   },
   "files": [
-    "lib"
+    "index.js",
+    "legacy.js"
   ],
   "repository": {
     "type": "git",
