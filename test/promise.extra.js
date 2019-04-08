@@ -4,7 +4,7 @@ import Bluebird from 'bluebird'
 
 import {
   factory
-} from '.'
+} from '..'
 
 const createFactory = x => () => x
 const createPromiseFactory = p => x => () => p.resolve(x)
